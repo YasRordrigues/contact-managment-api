@@ -23,7 +23,7 @@ jobs:
         id: deploy
         run: |
           terraform apply -auto-approve
-          echo "::set-output name=ip::$(terraform output -raw instance_ip)"
+          echo "INSTANCE_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
         env:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
@@ -32,8 +32,8 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -o StrictHostKeyChecking=no -i private_key.pem docker-compose.yml ubuntu@${{ steps.deploy.outputs.ip }}:~
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ steps.deploy.outputs.ip }} <<-EOF
+          scp -o StrictHostKeyChecking=no -i private_key.pem docker-compose.yml ubuntu@$INSTANCE_IP:~
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@$INSTANCE_IP <<-EOF
             docker-compose up --build -d
           EOF
         env:
