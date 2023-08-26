@@ -19,6 +19,9 @@ jobs:
       - name: Terraform Initialize
         run: terraform -chdir=contact-management-api/terraform init
 
+      - name: List directories
+        run: ls -la
+
       - name: Terraform Apply
         env:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
