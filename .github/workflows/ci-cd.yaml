@@ -3,7 +3,7 @@ name: Deploy EC2
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -18,12 +18,14 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: terraform
 
       - name: Terraform Apply
         id: deploy
         run: |
           terraform apply -auto-approve
           echo "INSTANCE_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
+        working-directory: terraform
         env:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
