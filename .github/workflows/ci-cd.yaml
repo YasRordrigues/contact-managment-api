@@ -17,24 +17,17 @@ jobs:
         uses: hashicorp/setup-terraform@v1
 
       - name: Terraform Initialize
-        run: terraform init terraform
+        run: terraform -chdir=contact-management-api/terraform init
 
       - name: Terraform Apply
         env:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform apply -auto-approve terraform
+        run: terraform -chdir=contact-management-api/terraform apply -auto-approve
 
       - name: Get EC2 IP
         id: ec2_ip
-        run: echo "::set-output name=ip::$(terraform output -state=terraform/terraform.tfstate public_ip)"
-
-      - name: Install Docker and Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-          sudo systemctl start docker
-          sudo systemctl enable docker
+        run: echo "::set-output name=ip::$(terraform -chdir=contact-management-api/terraform output public_ip)"
 
       - name: Deploy to EC2
         env:
@@ -43,4 +36,4 @@ jobs:
           echo "$PRIVATE_KEY" > deployer_key
           chmod 600 deployer_key
           scp -o StrictHostKeyChecking=no -i deployer_key docker-compose.yml ec2-user@${{ steps.ec2_ip.outputs.ip }}:/home/ec2-user/
-          ssh -o StrictHostKeyChecking=no -i deployer_key ec2-user@${{ steps.ec2_ip.outputs.ip }} "sudo docker-compose up --build -d"
+          ssh -o StrictHostKeyChecking=no -i deployer_key ec2-user@${{ steps.ec2_ip.outputs.ip }} "sudo apt-get update && sudo apt-get install -y docker docker-compose && sudo systemctl start docker && sudo systemctl enable docker && sudo docker-compose up --build -d"
