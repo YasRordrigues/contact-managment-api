@@ -17,7 +17,7 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -o StrictHostKeyChecking=no -i private_key.pem docker-compose.yml ubuntu@3.22.81.23:~
+          scp -o StrictHostKeyChecking=no -i private_key.pem docker-compose.yaml ubuntu@3.22.81.23:~
           ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@3.22.81.23 <<-EOF
             docker-compose up --build -d
           EOF
