@@ -26,7 +26,7 @@ jobs:
         env:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform -chdir=contact-management-api/terraform apply -auto-approve
+        run: terraform -chdir=terraform apply -auto-approve
 
       - name: Get EC2 IP
         id: ec2_ip
