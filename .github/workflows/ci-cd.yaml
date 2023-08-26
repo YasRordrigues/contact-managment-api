@@ -1,12 +1,14 @@
-name: CI/CD contact
+name: CI/CD Workflow
 
 on:
   push:
     branches:
       - master
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -15,17 +17,24 @@ jobs:
         uses: hashicorp/setup-terraform@v1
 
       - name: Terraform Initialize
-        run: terraform init
+        run: terraform init terraform
 
       - name: Terraform Apply
         env:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve terraform
 
       - name: Get EC2 IP
         id: ec2_ip
-        run: echo "::set-output name=ip::$(terraform output public_ip)"
+        run: echo "::set-output name=ip::$(terraform output -state=terraform/terraform.tfstate public_ip)"
+
+      - name: Install Docker and Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+          sudo systemctl start docker
+          sudo systemctl enable docker
 
       - name: Deploy to EC2
         env:
@@ -33,5 +42,5 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > deployer_key
           chmod 600 deployer_key
-          scp -o StrictHostKeyChecking=no -i deployer_key target/myapp.jar ec2-user@${{ steps.ec2_ip.outputs.ip }}:/home/ec2-user/
-          ssh -o StrictHostKeyChecking=no -i deployer_key ec2-user@${{ steps.ec2_ip.outputs.ip }} "sudo nohup java -jar /home/ec2-user/myapp.jar &"
+          scp -o StrictHostKeyChecking=no -i deployer_key docker-compose.yml ec2-user@${{ steps.ec2_ip.outputs.ip }}:/home/ec2-user/
+          ssh -o StrictHostKeyChecking=no -i deployer_key ec2-user@${{ steps.ec2_ip.outputs.ip }} "sudo docker-compose up --build -d"
