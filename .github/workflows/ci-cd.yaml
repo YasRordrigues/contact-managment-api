@@ -1,4 +1,4 @@
-name: CI/CD Workflow
+name: Deploy EC2
 
 on:
   push:
@@ -10,33 +10,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v2
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
 
-      - name: Terraform Initialize
-        run: terraform -chdir=contact-management-api/terraform init
-
-      - name: List directories
-        run: ls -la
+      - name: Terraform Init
+        run: terraform init
 
       - name: Terraform Apply
-        env:
-          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform -chdir=terraform apply -auto-approve
-
-      - name: Get EC2 IP
-        id: ec2_ip
-        run: echo "::set-output name=ip::$(terraform -chdir=contact-management-api/terraform output public_ip)"
-
-      - name: Deploy to EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        id: deploy
         run: |
-          echo "$PRIVATE_KEY" > deployer_key
-          chmod 600 deployer_key
-          scp -o StrictHostKeyChecking=no -i deployer_key docker-compose.yml ec2-user@${{ steps.ec2_ip.outputs.ip }}:/home/ec2-user/
-          ssh -o StrictHostKeyChecking=no -i deployer_key ec2-user@${{ steps.ec2_ip.outputs.ip }} "sudo apt-get update && sudo apt-get install -y docker docker-compose && sudo systemctl start docker && sudo systemctl enable docker && sudo docker-compose up --build -d"
+          terraform apply -auto-approve
+          echo "::set-output name=ip::$(terraform output -raw instance_ip)"
+        env:
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+
+      - name: Deploy via SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -o StrictHostKeyChecking=no -i private_key.pem docker-compose.yml ubuntu@${{ steps.deploy.outputs.ip }}:~
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ steps.deploy.outputs.ip }} <<-EOF
+            docker-compose up --build -d
+          EOF
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
