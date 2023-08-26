@@ -1,4 +1,4 @@
-package com.example.contactmanagementapi.core.mappers;
+package com.example.contactmanagementapi.infra.mappers;
 
 public interface IBaseMapper<T,D> {
     T toDto(D entity);

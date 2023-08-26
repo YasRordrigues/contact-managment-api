@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class    AddressDto {
+public class AddressDto {
     private Long id;
     @NotBlank(message = "Street is required.")
     private String street;

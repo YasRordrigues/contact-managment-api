@@ -1,4 +1,4 @@
-package com.example.contactmanagementapi.core.mappers;
+package com.example.contactmanagementapi.infra.mappers;
 
 import com.example.contactmanagementapi.application.dto.ContactDto;
 import com.example.contactmanagementapi.domain.entities.ContactEntity;

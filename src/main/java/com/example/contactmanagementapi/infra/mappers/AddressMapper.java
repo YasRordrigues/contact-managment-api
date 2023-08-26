@@ -1,8 +1,6 @@
-package com.example.contactmanagementapi.core.mappers;
+package com.example.contactmanagementapi.infra.mappers;
 
 import com.example.contactmanagementapi.application.dto.AddressDto;
-import com.example.contactmanagementapi.application.dto.ContactDto;
-import com.example.contactmanagementapi.domain.entities.ContactEntity;
 import com.example.contactmanagementapi.domain.valueobjects.AddressEntity;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;

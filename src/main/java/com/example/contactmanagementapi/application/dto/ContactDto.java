@@ -3,6 +3,7 @@ package com.example.contactmanagementapi.application.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -34,13 +35,11 @@ public class ContactDto {
     private String phone;
 
     @NotNull(message = "Birthdate is required.")
-    @NotBlank(message = "Birthdate is required.")
-    @NotEmpty(message = "Birthdate is required.")
     @JsonProperty("birthDate")
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
 
     @NotNull(message = "Addresses is required.")
-    @NotBlank(message = "Addresses is required.")
+    @Valid
     private List<AddressDto> addresses;
 }

@@ -1,4 +1,4 @@
-package com.example.contactmanagementapi.core.config;
+package com.example.contactmanagementapi.infra.config;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;

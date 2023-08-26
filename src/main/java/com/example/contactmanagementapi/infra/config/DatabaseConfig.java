@@ -1,4 +1,4 @@
-package com.example.contactmanagementapi.core.config;
+package com.example.contactmanagementapi.infra.config;
 
 import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +12,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-//@EnableR2dbcRepositories
-//@EnableR2dbcAuditing
 public class DatabaseConfig extends AbstractR2dbcConfiguration {
 
     @Bean
