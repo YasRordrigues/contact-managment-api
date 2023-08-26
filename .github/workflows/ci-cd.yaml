@@ -1,9 +1,9 @@
-name: Deploy EC2
+name: Deploy Application
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -13,29 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: terraform
-
-      - name: Terraform Apply
-        id: deploy
-        run: |
-          terraform apply -auto-approve
-          echo "INSTANCE_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
-        working-directory: terraform
-        env:
-          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-
       - name: Deploy via SSH
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -o StrictHostKeyChecking=no -i private_key.pem docker-compose.yml ubuntu@$INSTANCE_IP:~
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@$INSTANCE_IP <<-EOF
+          scp -o StrictHostKeyChecking=no -i private_key.pem docker-compose.yml ubuntu@<YOUR_EC2_IP>:~
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@<YOUR_EC2_IP> <<-EOF
             docker-compose up --build -d
           EOF
         env:
